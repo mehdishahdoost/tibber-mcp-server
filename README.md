@@ -1,5 +1,7 @@
 # Tibber MCP Server
 
+Available on npm: [tibber-mcp-server v0.2.2](https://www.npmjs.com/package/tibber-mcp-server/v/0.2.2).
+
 Read-only access to Tibber account details, home addresses, electricity prices, and consumption or production history through MCP.
 
 Runs on Node.js 18+ with the official JavaScript MCP SDK and Node's built-in `fetch`. No Java runtime, Maven build, or Java connector is required. Supports stdio and loopback Streamable HTTP; live WebSocket subscriptions and account changes are not implemented.
