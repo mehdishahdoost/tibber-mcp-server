@@ -1,0 +1,24 @@
+{
+  "name": "tibber-mcp-server",
+  "version": "0.2.1",
+  "description": "Read-only Tibber MCP server for stdio and Streamable HTTP",
+  "type": "module",
+  "bin": {
+    "tibber-mcp-server": "./bin/tibber-mcp-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node ./bin/tibber-mcp-server.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.0",
+    "zod": "3.25.76"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "graphql": "16.14.2"
+  }
+}
