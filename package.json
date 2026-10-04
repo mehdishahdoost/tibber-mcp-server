@@ -20,5 +20,22 @@
   "license": "MIT",
   "devDependencies": {
     "graphql": "16.14.2"
-  }
+  },
+  "files": [
+    "bin/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mehdishahdoost/tibber-mcp-server.git"
+  },
+  "homepage": "https://github.com/mehdishahdoost/tibber-mcp-server#readme",
+  "bugs": {
+    "url": "https://github.com/mehdishahdoost/tibber-mcp-server/issues"
+  },
+  "keywords": [
+    "tibber",
+    "mcp",
+    "electricity",
+    "energy"
+  ]
 }

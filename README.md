@@ -78,11 +78,11 @@ TIBBER_TRANSPORT=http TIBBER_PORT=8080 npm start
 
 Connect your MCP client using Streamable HTTP at `http://127.0.0.1:8080/mcp`. The server always binds to `127.0.0.1`; there is no configurable public bind address. HTTP mode is stateless and accepts MCP requests through POST. Opening `/mcp` in a browser sends GET and returns HTTP 405; that is expected. The root `/` returns HTTP 404.
 
-### Run with npx after publication
+### Run with npx
 
-The package name is `tibber-mcp-server`. As of 2026-10-04, this package is not published to npm. Use the local setup above until a release is published.
+The npm package name is `tibber-mcp-server`. Node.js 18+ is required; no checkout or build is needed.
 
-Once published, with `tibber.properties` in the current directory or `TIBBER_ACCESS_TOKEN` set:
+With `tibber.properties` in the current directory or `TIBBER_ACCESS_TOKEN` set:
 
 ```sh
 npx -y tibber-mcp-server
