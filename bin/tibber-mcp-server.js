@@ -45,7 +45,7 @@ async function gql(token, query, variables = {}) {
       headers: {
         authorization: `Bearer ${token}`,
         'content-type': 'application/json',
-        'user-agent': `tibber-mcp-server/0.2.1 Node/${process.versions.node}`
+        'user-agent': `tibber-mcp-server/0.2.2 Node/${process.versions.node}`
       },
       body: JSON.stringify({ query, variables })
     });
@@ -161,7 +161,7 @@ async function toolResult(operation) {
 }
 
 export function makeServer(token) {
-  const server = new McpServer({ name: 'tibber-mcp-server', version: '0.2.1' });
+  const server = new McpServer({ name: 'tibber-mcp-server', version: '0.2.2' });
   addTools(server, token);
   return server;
 }

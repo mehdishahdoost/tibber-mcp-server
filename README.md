@@ -4,63 +4,20 @@ Read-only access to Tibber account details, home addresses, electricity prices, 
 
 Runs on Node.js 18+ with the official JavaScript MCP SDK and Node's built-in `fetch`. No Java runtime, Maven build, or Java connector is required. Supports stdio and loopback Streamable HTTP; live WebSocket subscriptions and account changes are not implemented.
 
-## Local setup
+## Connect using npx
 
-Run these commands from the repository root. Shell examples use Bash.
-
-```sh
-npm ci
-```
-
-Get a personal access token from the [Tibber developer portal](https://developer.tibber.com/), then create `tibber.properties` in the repository root:
-
-```properties
-accessToken=YOUR_TIBBER_ACCESS_TOKEN
-transport=stdio
-port=8080
-```
-
-Replace the token placeholder with your token. This file is ignored by Git; keep it private and avoid pasting its contents into chats or logs.
-
-To launch manually:
-
-```sh
-npm start
-```
-
-Stdio mode waits for MCP messages on standard input and writes protocol responses to standard output. A quiet terminal is normal. An MCP client should launch the executable directly, as shown below.
-
-## Connect an MCP client
-
-### Codex CLI
-
-After local setup, run this from the repository root:
-
-```sh
-codex mcp add tibber \
-  --env "TIBBER_CONFIG=$(pwd)/tibber.properties" \
-  --env TIBBER_TRANSPORT=stdio \
-  -- node "$(pwd)/bin/tibber-mcp-server.js"
-
-codex mcp list
-```
-
-`$(pwd)` resolves to the actual checkout path, so the configuration works even when Codex starts elsewhere. This example reads the token from the properties file. See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp) for client configuration details.
-
-Restart Codex after configuring the server or updating its source so it launches a fresh process. Then ask it to call `tibber_account` to find your homes, followed by `tibber_prices` with the selected home ID. No rebuild is required for JavaScript source changes.
+Install Node.js 18+ and get a personal access token from the [Tibber developer portal](https://developer.tibber.com/). No checkout or build is needed. Replace `YOUR_TIBBER_ACCESS_TOKEN` in the examples with your token.
 
 ### Clients using `mcpServers` JSON
-
-Replace **both** `/FULL/PATH/TO/tibber-mcp-server` paths below with the actual checkout path. The placeholder is not a valid executable location. Other clients may use different configuration formats.
 
 ```json
 {
   "mcpServers": {
     "tibber": {
-      "command": "node",
-      "args": ["/FULL/PATH/TO/tibber-mcp-server/bin/tibber-mcp-server.js"],
+      "command": "npx",
+      "args": ["-y", "tibber-mcp-server@latest"],
       "env": {
-        "TIBBER_CONFIG": "/FULL/PATH/TO/tibber-mcp-server/tibber.properties",
+        "TIBBER_ACCESS_TOKEN": "YOUR_TIBBER_ACCESS_TOKEN",
         "TIBBER_TRANSPORT": "stdio"
       }
     }
@@ -68,38 +25,41 @@ Replace **both** `/FULL/PATH/TO/tibber-mcp-server` paths below with the actual c
 }
 ```
 
+### Codex CLI
+
+```sh
+codex mcp add tibber \
+  --env TIBBER_ACCESS_TOKEN=YOUR_TIBBER_ACCESS_TOKEN \
+  --env TIBBER_TRANSPORT=stdio \
+  -- npx -y tibber-mcp-server@latest
+
+codex mcp list
+```
+
+See the [official Codex MCP documentation](https://developers.openai.com/codex/mcp) for client configuration details. Restart your MCP client after changing its configuration or installing a new release. Ask it to call `tibber_account` to find your homes, then `tibber_prices` with the selected home ID.
+
+`@latest` selects the latest npm release when launched. To pin a version, replace it with `@0.2.2`. Stdio mode waits for MCP messages; a quiet terminal is normal.
+
 ### Streamable HTTP
 
-With credentials configured, start the server from the repository root:
+Set your token and launch with npx (Bash):
 
 ```sh
-TIBBER_TRANSPORT=http TIBBER_PORT=8080 npm start
+export TIBBER_ACCESS_TOKEN=YOUR_TIBBER_ACCESS_TOKEN
+TIBBER_TRANSPORT=http TIBBER_PORT=8080 npx -y tibber-mcp-server@latest
 ```
 
-Connect your MCP client using Streamable HTTP at `http://127.0.0.1:8080/mcp`. The server always binds to `127.0.0.1`; there is no configurable public bind address. HTTP mode is stateless and accepts MCP requests through POST. Opening `/mcp` in a browser sends GET and returns HTTP 405; that is expected. The root `/` returns HTTP 404.
+Connect your MCP client using Streamable HTTP at `http://127.0.0.1:8080/mcp`. The server binds to loopback only. HTTP mode is stateless and accepts MCP requests through POST. Opening `/mcp` in a browser sends GET and returns HTTP 405; the root `/` returns HTTP 404.
 
-### Run with npx
+### Environment variables
 
-The npm package name is `tibber-mcp-server`. Node.js 18+ is required; no checkout or build is needed.
+| Variable | Default / accepted values |
+| --- | --- |
+| `TIBBER_ACCESS_TOKEN` | Required access token |
+| `TIBBER_TRANSPORT` | `stdio` (default) or `http` |
+| `TIBBER_PORT` | `8080`; integer from 1 to 65535 |
 
-With `tibber.properties` in the current directory or `TIBBER_ACCESS_TOKEN` set:
-
-```sh
-npx -y tibber-mcp-server
-```
-
-For a stdio MCP client, use `command: "npx"` and `args: ["-y", "tibber-mcp-server"]`, with an absolute `TIBBER_CONFIG` path or a `TIBBER_ACCESS_TOKEN` environment value. HTTP mode uses the same environment settings as the local executable.
-
-## Configuration
-
-| Environment variable | Properties key | Default / accepted values |
-| --- | --- | --- |
-| `TIBBER_ACCESS_TOKEN` | `accessToken` | Required; missing credentials stop startup |
-| `TIBBER_TRANSPORT` | `transport` | `stdio` (default) or `http` |
-| `TIBBER_PORT` | `port` | `8080`; integer from 1 to 65535 |
-| `TIBBER_CONFIG` | — | `tibber.properties` in the process's current working directory |
-
-Nonempty environment values take precedence over file values. The optional properties file supports simple `key=value` or `key:value` lines, blank lines, and comments beginning with `#` or `!`. It does not implement the full Java properties escaping or continuation syntax. Use an absolute `TIBBER_CONFIG` path when an MCP client launches the server from another directory.
+Keep your token private. Client configuration files containing it should not be committed to Git.
 
 ## Available tools
 
@@ -134,13 +94,13 @@ API and range errors return MCP `isError: true` with `structuredContent.error.co
 
 | Error or symptom | What to check |
 | --- | --- |
-| Startup asks for `TIBBER_ACCESS_TOKEN` | Set the token in the environment or properties file; check the config file's absolute path |
+| Startup asks for `TIBBER_ACCESS_TOKEN` | Set `TIBBER_ACCESS_TOKEN` in the MCP client environment |
 | `AUTH_FAILED` | Tibber returned HTTP 401/403; check the token's validity and access |
 | `INVALID_INPUT` / `INVALID_RANGE` | Check home ID, timestamps, ordering, and the 31-day maximum |
 | `EMPTY_DATA` | Tibber returned no data or no history nodes within the requested interval |
 | `API_ERROR` | Read the message: GraphQL errors include Tibber's first error and HTTP status; also check network access |
-| `Cannot find module` / `ERR_MODULE_NOT_FOUND` | Check the real script path and run `npm ci` in the checkout |
-| An old GraphQL error persists after a source update | Restart the MCP server/client so it reloads the changed JavaScript |
+| `npx` not found | Install Node.js and ensure the MCP client can find `npx` on its PATH |
+| An old error persists after an update | Use `tibber-mcp-server@latest` and restart the MCP client |
 
 ## Development checks
 
@@ -152,3 +112,16 @@ npm test
 The 8 regression checks in [test/tools.test.js](test/tools.test.js) call every tool through an in-memory MCP client. A mocked Tibber endpoint parses, validates, and executes the generated GraphQL against a fixture containing the schema fields we use. Coverage includes account/home addresses, prices for two homes, unpublished day-ahead prices, and hourly/daily consumption and production.
 
 Tests use synthetic data and need no Tibber token or network access after dependencies are installed. They do not verify live account data, credentials, upstream schema changes, or stdio/HTTP transport behavior. These checks have been run on Node.js 22.22.0. The `graphql` package is a development dependency used by the checks; the runtime uses the JavaScript MCP SDK and Zod.
+
+## Publishing releases
+
+[`.github/workflows/publish.yml`](https://github.com/mehdishahdoost/tibber-mcp-server/blob/main/.github/workflows/publish.yml) publishes to npm when a GitHub release is published. It checks that the release tag matches `package.json`, installs locked dependencies, and publishes with npm provenance.
+
+One-time setup: in the npm package settings, configure a [trusted publisher](https://docs.npmjs.com/trusted-publishers/) for GitHub Actions:
+
+- Owner: `mehdishahdoost`
+- Repository: `tibber-mcp-server`
+- Workflow filename: `publish.yml`
+- Environment: leave empty
+
+No npm token secret is needed with trusted publishing. For a new release, update the version in `package.json`, `package-lock.json`, and the server metadata in `bin/tibber-mcp-server.js`; commit and push, then publish a GitHub release with the matching `vX.Y.Z` tag. npm versions are immutable; always increment the version.

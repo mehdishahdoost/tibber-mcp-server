@@ -1,10 +1,10 @@
 {
   "name": "tibber-mcp-server",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Read-only Tibber MCP server for stdio and Streamable HTTP",
   "type": "module",
   "bin": {
-    "tibber-mcp-server": "./bin/tibber-mcp-server.js"
+    "tibber-mcp-server": "bin/tibber-mcp-server.js"
   },
   "engines": {
     "node": ">=18"

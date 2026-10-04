@@ -1,0 +1,43 @@
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Check release version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const { version } = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          if (process.env.RELEASE_TAG !== `v${version}`) {
+            throw new Error('Release tag must match package.json version');
+          }
+          JS
+      - run: npm ci
+      - name: Publish with trusted publishing
+        run: npm publish --access public --provenance --registry=https://registry.npmjs.org/
